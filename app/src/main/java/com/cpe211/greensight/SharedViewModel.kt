@@ -1,14 +1,48 @@
 package com.cpe211.greensight
 
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import android.app.Application
 import android.content.Context
 import android.widget.TextView
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import com.cpe211.greensight.db.AppDatabase
+import com.cpe211.greensight.db.dao.HumidityDataDao
+import com.cpe211.greensight.db.dao.TemperatureDataDao
+import com.cpe211.greensight.model.HumidityData
+import com.cpe211.greensight.model.TemperatureData
 import okhttp3.*
 import java.io.IOException
 import java.util.*
+import kotlinx.coroutines.*
 
-class SharedViewModel : ViewModel() {
+class SharedViewModel(application: Application) : AndroidViewModel(application) {
     private val timer = Timer()
+    private val temperatureDataDao: TemperatureDataDao
+    private val humidityDataDao: HumidityDataDao
+    private val timerScope = CoroutineScope(Dispatchers.Default)
+
+    init {
+        val database = AppDatabase.getDatabase(application.applicationContext)
+        temperatureDataDao = database.temperatureDataDao()
+        humidityDataDao = database.humidityDataDao()
+    }
+
+    suspend fun getTemperatureDataInRange(startTime: Long, endTime: Long): List<TemperatureData> {
+        return temperatureDataDao.getTemperatureDataInRange(startTime, endTime)
+    }
+
+    suspend fun getHumidityDataInRange(startTime: Long, endTime: Long): List<HumidityData> {
+        return humidityDataDao.getHumidityDataInRange(startTime, endTime)
+    }
+
+    suspend fun getAllTemperatureData(): List<TemperatureData> {
+        return temperatureDataDao.getAllTemperatureData()
+    }
+
+    suspend fun getAllHumidityData(): List<HumidityData> {
+        return humidityDataDao.getAllHumidityData()
+    }
 
     fun getIPAddress(context: Context): String {
         val sharedPref = context.getSharedPreferences("ip_pref", Context.MODE_PRIVATE)
@@ -122,5 +156,42 @@ class SharedViewModel : ViewModel() {
                 callback(success, if (success) "Action $action successful" else "Failed to perform action $action")
             }
         })
+    }
+    fun fetchAndSaveData(ipAddress: String, client: OkHttpClient) {
+        val currentTime = Calendar.getInstance().timeInMillis
+
+        fetchTemperature(ipAddress, client) { temperature ->
+            temperature?.toDoubleOrNull()?.let {
+                val temperatureData = TemperatureData(temperatureValue = it, timestamp = currentTime)
+                saveTemperatureData(temperatureData)
+            }
+        }
+
+        fetchHumidity(ipAddress, client) { humidity ->
+            humidity?.toDoubleOrNull()?.let {
+                val humidityData = HumidityData(humidityValue = it, timestamp = currentTime)
+                saveHumidityData(humidityData)
+            }
+        }
+    }
+
+    private fun saveTemperatureData(temperatureData: TemperatureData) {
+        viewModelScope.launch {
+            temperatureDataDao.insert(temperatureData)
+        }
+    }
+
+    private fun saveHumidityData(humidityData: HumidityData) {
+        viewModelScope.launch {
+            humidityDataDao.insert(humidityData)
+        }
+    }
+    fun startPeriodicDataFetch(ipAddress: String, client: OkHttpClient) {
+        timerScope.launch {
+            while (isActive) {
+                fetchAndSaveData(ipAddress, client)
+                delay(10000) // Fetch data every 10 seconds
+            }
+        }
     }
 }

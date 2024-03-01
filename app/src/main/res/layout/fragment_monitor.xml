@@ -53,15 +53,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!--<com.google.android.material.tabs.TabLayout
-                android:id="@+id/temperature_graph_timeframe_tabs"
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/graph_timeframe_tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/text_Temperature_Graph">
+                app:layout_constraintTop_toTopOf="parent">
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
@@ -87,20 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Year" />
-            </com.google.android.material.tabs.TabLayout> -->
-
-            <TextView
-                android:id="@+id/text_Temporary_Hourly"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="20dp"
-                android:text="Hourly Graph"
-                android:fontFamily="sans-serif-black"
-                android:textColor="@color/aBlack"
-                android:textFontWeight="900"
-                android:textSize="32sp"
-                android:gravity="center"
-                app:layout_constraintTop_toTopOf="parent"/>
+            </com.google.android.material.tabs.TabLayout>
 
             <TextView
                 android:id="@+id/text_Temperature_Graph"
@@ -113,7 +99,7 @@
                 android:textFontWeight="600"
                 android:textSize="24sp"
                 android:gravity="center"
-                app:layout_constraintTop_toBottomOf="@id/text_Temporary_Hourly"/>
+                app:layout_constraintTop_toBottomOf="@id/graph_timeframe_tabs"/>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/graph_temp_card_holder"
@@ -201,6 +187,28 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent" />
                 </androidx.cardview.widget.CardView>
+
+                <Button
+                    android:id="@+id/showDataButton"
+                    android:layout_width="240dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="30dp"
+                    android:background="@drawable/rounded_button"
+                    android:text="Show Data"
+                    android:textColor="@drawable/button_text_color"
+                    app:layout_constraintTop_toBottomOf="@id/graph_humidity_card"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <TextView
+                    android:id="@+id/dataDisplayTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="20dp"
+                    android:scrollbars = "vertical"
+                    app:layout_constraintTop_toBottomOf="@id/showDataButton"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
