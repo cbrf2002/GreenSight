@@ -17,7 +17,6 @@ import java.util.*
 import kotlinx.coroutines.*
 
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
-    private val timer = Timer()
     private val temperatureDataDao: TemperatureDataDao
     private val humidityDataDao: HumidityDataDao
     private val timerScope = CoroutineScope(Dispatchers.Default)
@@ -49,47 +48,44 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         return sharedPref.getString("ip_address", "") ?: ""
     }
 
-    fun fetchTemperature(ipAddress: String, client: OkHttpClient, callback: (String?) -> Unit) {
-        val url = "http://$ipAddress/temperature"
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend fun fetchData(endpoint: String, ipAddress: String, client: OkHttpClient): String? =
+        suspendCancellableCoroutine { continuation ->
+        val url = "http://$ipAddress/$endpoint"
         val request = Request.Builder().url(url).build()
-        client.newCall(request).enqueue(object : Callback {
+        val call = client.newCall(request)
+
+        continuation.invokeOnCancellation {
+            call.cancel()
+        }
+
+        call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callback(null)
+                continuation.resume(null) {
+                    call.cancel()
+                }
             }
 
             override fun onResponse(call: Call, response: Response) {
                 try {
-                    val temperature = response.body?.string()
-                    callback(temperature)
+                    val data = response.body?.string()
+                    continuation.resume(data) {
+                        response.close()
+                    }
                 } catch (e: Exception) {
-                    callback(null)
-                } finally {
-                    response.close()
+                    continuation.resume(null) {
+                        response.close()
+                    }
                 }
             }
         })
     }
 
-    fun fetchHumidity(ipAddress: String, client: OkHttpClient, callback: (String?) -> Unit) {
-        val url = "http://$ipAddress/humidity"
-        val request = Request.Builder().url(url).build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                callback(null)
-            }
+    private suspend fun fetchTemperature(ipAddress: String, client: OkHttpClient): String? =
+        fetchData("temperature", ipAddress, client)
 
-            override fun onResponse(call: Call, response: Response) {
-                try {
-                    val humidity = response.body?.string()
-                    callback(humidity)
-                } catch (e: Exception) {
-                    callback(null)
-                } finally {
-                    response.close()
-                }
-            }
-        })
-    }
+    private suspend fun fetchHumidity(ipAddress: String, client: OkHttpClient): String? =
+        fetchData("humidity", ipAddress, client)
 
     fun startUpdatingTemperatureAndHumidity(
         ipAddress: String,
@@ -97,23 +93,38 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         temperatureTextView: TextView,
         humidityTextView: TextView
     ) {
-        timer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                fetchTemperature(ipAddress, client) { temperature ->
-                    temperatureTextView.post {
-                        val formattedTemp = if (temperature.isNullOrEmpty()) "N/A" else "$temperature °C"
-                        temperatureTextView.text = formattedTemp
-                    }
+        viewModelScope.launch {
+            try {
+                val temperature = fetchTemperature(ipAddress, client)
+                val humidity = fetchHumidity(ipAddress, client)
+
+                // Update UI with temperature and humidity values
+                temperatureTextView.post {
+                    val formattedTemp = temperature?.let { "$it °C" } ?: "N/A"
+                    temperatureTextView.text = formattedTemp
                 }
 
-                fetchHumidity(ipAddress, client) { humidity ->
-                    humidityTextView.post {
-                        val formattedHumidity = if (humidity.isNullOrEmpty()) "N/A" else "$humidity %"
-                        humidityTextView.text = formattedHumidity
-                    }
+                humidityTextView.post {
+                    val formattedHumidity = humidity?.let { "$it %" } ?: "N/A"
+                    humidityTextView.text = formattedHumidity
                 }
+
+                // Save temperature and humidity data
+                temperature?.toDoubleOrNull()?.let {
+                    saveTemperatureData(TemperatureData(temperatureValue = it, timestamp = System.currentTimeMillis()))
+                }
+
+                humidity?.toDoubleOrNull()?.let {
+                    saveHumidityData(HumidityData(humidityValue = it, timestamp = System.currentTimeMillis()))
+                }
+            } catch (e: Exception) {
+                // Handle exceptions
+                e.printStackTrace()
             }
-        }, 0, 10000)
+
+            // Delay for 10 seconds
+            delay(10000)
+        }
     }
 
     fun getUserName(context: Context): String {
@@ -157,21 +168,15 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             }
         })
     }
-    fun fetchAndSaveData(ipAddress: String, client: OkHttpClient) {
+    private suspend fun fetchAndSaveData(ipAddress: String, client: OkHttpClient) {
         val currentTime = Calendar.getInstance().timeInMillis
 
-        fetchTemperature(ipAddress, client) { temperature ->
-            temperature?.toDoubleOrNull()?.let {
-                val temperatureData = TemperatureData(temperatureValue = it, timestamp = currentTime)
-                saveTemperatureData(temperatureData)
-            }
+        fetchTemperature(ipAddress, client)?.toDoubleOrNull()?.let {
+            saveTemperatureData(TemperatureData(temperatureValue = it, timestamp = currentTime))
         }
 
-        fetchHumidity(ipAddress, client) { humidity ->
-            humidity?.toDoubleOrNull()?.let {
-                val humidityData = HumidityData(humidityValue = it, timestamp = currentTime)
-                saveHumidityData(humidityData)
-            }
+        fetchHumidity(ipAddress, client)?.toDoubleOrNull()?.let {
+            saveHumidityData(HumidityData(humidityValue = it, timestamp = currentTime))
         }
     }
 

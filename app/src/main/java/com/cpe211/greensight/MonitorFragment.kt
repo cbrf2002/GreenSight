@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +17,7 @@ import kotlinx.coroutines.*
 import androidx.lifecycle.lifecycleScope
 import com.cpe211.greensight.model.HumidityData
 import com.cpe211.greensight.model.TemperatureData
+import com.github.mikephil.charting.formatter.ValueFormatter
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 import java.text.SimpleDateFormat
@@ -29,22 +28,27 @@ import java.util.Locale
 
 class MonitorFragment : Fragment() {
 
-    private lateinit var lineChart: LineChart
+    private lateinit var temperatureLineChart: LineChart
     private lateinit var sharedViewModel: SharedViewModel
-    private lateinit var fetchDataButton: Button
-    private lateinit var dataDisplayTextView: TextView
     private lateinit var ipAddress: String
     private val client = OkHttpClient()
-    private var periodicJob: Job? = null
+    //private var periodicJob: Job? = null
+
+    companion object {
+        private val INTERVAL_LAST_HOUR = TimeUnit.HOURS.toMillis(1)
+        private val INTERVAL_LAST_24_HOURS = TimeUnit.DAYS.toMillis(1)
+        private val INTERVAL_LAST_7_DAYS = TimeUnit.DAYS.toMillis(7)
+        private val INTERVAL_LAST_30_DAYS = TimeUnit.DAYS.toMillis(30)
+        private val INTERVAL_LAST_12_MONTHS = TimeUnit.DAYS.toMillis(365)
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_monitor, container, false)
-        lineChart = view.findViewById(R.id.temp_line_chart)
-        fetchDataButton = view.findViewById(R.id.showDataButton)
-        dataDisplayTextView = view.findViewById(R.id.dataDisplayTextView)
+        temperatureLineChart = view.findViewById(R.id.temp_line_chart)
         ipAddress = getIPAddressFromSharedPreferences()
 
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
@@ -62,21 +66,17 @@ class MonitorFragment : Fragment() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
 
-        fetchDataButton.setOnClickListener {
-            fetchDataAndDisplay()
-        }
         sharedViewModel.startPeriodicDataFetch(ipAddress, client)
 
         updateChartForTab(0)
 
         return view
     }
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    /*override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        startPeriodicDataFetching()
-    }
-    private fun startPeriodicDataFetching() {
+        //startPeriodicDataFetching()
+    }*/
+    /*private fun startPeriodicDataFetching() {
         periodicJob = viewLifecycleOwner.lifecycleScope.launch {
             while (isActive) {
                 fetchDataAndDisplay() // Fetch and display data
@@ -93,7 +93,7 @@ class MonitorFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         stopPeriodicDataFetching() // Stop the periodic data fetching when the view is destroyed
-    }
+    }*/
 
     private fun getIPAddressFromSharedPreferences(): String {
         // Example of retrieving ipAddress from SharedPreferences
@@ -102,19 +102,18 @@ class MonitorFragment : Fragment() {
     }
     private fun updateChartForTab(tabPosition: Int) {
         val currentTime = Calendar.getInstance().timeInMillis
-        val startTime = when (tabPosition) {
-            0 -> currentTime - TimeUnit.HOURS.toMillis(1) // Last hour
-            1 -> currentTime - TimeUnit.DAYS.toMillis(1) // Last 24 hours
-            2 -> currentTime - TimeUnit.DAYS.toMillis(7) // Last 7 days
-            3 -> currentTime - TimeUnit.DAYS.toMillis(30) // Last 30 days
-            4 -> currentTime - TimeUnit.DAYS.toMillis(365) // Last 12 months
-            else -> 0
-        }
+        val intervals = listOf(
+            INTERVAL_LAST_HOUR,
+            INTERVAL_LAST_24_HOURS,
+            INTERVAL_LAST_7_DAYS,
+            INTERVAL_LAST_30_DAYS,
+            INTERVAL_LAST_12_MONTHS
+        )
+        val startTime = currentTime - intervals.getOrElse(tabPosition) { 0 }
 
         lifecycleScope.launch {
             val temperatureData = sharedViewModel.getTemperatureDataInRange(startTime, currentTime)
             val humidityData = sharedViewModel.getHumidityDataInRange(startTime, currentTime)
-
             updateCharts(temperatureData, humidityData)
         }
     }
@@ -131,41 +130,72 @@ class MonitorFragment : Fragment() {
             temperatureEntries.add(Entry(index.toFloat(), data.temperatureValue.toFloat()))
         }
 
-        val temperatureDataSet = LineDataSet(temperatureEntries, "Temperature")
+        val temperatureDataSet = LineDataSet(temperatureEntries, "")
         temperatureDataSet.color = ContextCompat.getColor(requireContext(), R.color.aGreen)
+        temperatureDataSet.setDrawCircles(false)
+        //temperatureDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
         val lineData = LineData(temperatureDataSet)
-        lineChart.data = lineData
-        lineChart.invalidate()
+        temperatureLineChart.data = lineData
+
+        // Customize x-axis labels
+        val xAxis = temperatureLineChart.xAxis
+        xAxis.valueFormatter = object : ValueFormatter() {
+            private val dateFormat = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
+
+            override fun getFormattedValue(value: Float): String {
+                val timestamp = temperatureData.getOrNull(value.toInt())?.timestamp ?: 0
+                val date = Date(timestamp)
+                return dateFormat.format(date)
+            }
+        }
+        xAxis.labelCount = 4
+
+        temperatureLineChart.legend.isEnabled = false
+        temperatureLineChart.description.isEnabled = false
+        temperatureLineChart.invalidate()
     }
 
     private fun updateHumidityChart(humidityData: List<HumidityData>) {
-        // Assuming you have a separate chart for humidity
         val humidityEntries = mutableListOf<Entry>()
 
         humidityData.forEachIndexed { index, data ->
             humidityEntries.add(Entry(index.toFloat(), data.humidityValue.toFloat()))
         }
 
-        val humidityDataSet = LineDataSet(humidityEntries, "Humidity")
+        val humidityDataSet = LineDataSet(humidityEntries, "")
         humidityDataSet.color = ContextCompat.getColor(requireContext(), R.color.aGreen)
-
-        // Assuming you have a separate humidityLineChart
-        val humidityLineChart = requireView().findViewById<LineChart>(R.id.humidity_line_chart)
+        humidityDataSet.setDrawCircles(false)
+        //humidityDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
         val lineData = LineData(humidityDataSet)
+
+        val humidityLineChart = requireView().findViewById<LineChart>(R.id.humidity_line_chart)
         humidityLineChart.data = lineData
+
+        // Customize x-axis labels for humidity chart
+        val xAxis = humidityLineChart.xAxis
+        xAxis.valueFormatter = object : ValueFormatter() {
+            private val dateFormat = SimpleDateFormat("MM-dd HH:mm", Locale.getDefault())
+
+            override fun getFormattedValue(value: Float): String {
+                val timestamp = humidityData.getOrNull(value.toInt())?.timestamp ?: 0
+                val date = Date(timestamp)
+                return dateFormat.format(date)
+            }
+        }
+        xAxis.labelCount = 4
+
+        humidityLineChart.legend.isEnabled = false
+        humidityLineChart.description.isEnabled = false
         humidityLineChart.invalidate()
     }
 
+    /*
     private fun fetchDataAndDisplay() {
         lifecycleScope.launch {
             val temperatureData = sharedViewModel.getAllTemperatureData()
             val humidityData = sharedViewModel.getAllHumidityData()
-
-            // Display the data in the TextView
-            val displayText = buildDisplayText(temperatureData, humidityData)
-            dataDisplayTextView.text = displayText
         }
     }
 
@@ -192,4 +222,5 @@ class MonitorFragment : Fragment() {
         val date = Date(timestamp)
         return dateFormat.format(date)
     }
+    */
 }
