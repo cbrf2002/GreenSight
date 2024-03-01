@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgWhite"
+    tools:context=".SettingsFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/configuration_main"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        android:fitsSystemWindows="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/logo_both"
+            android:layout_width="150dp"
+            android:layout_height="0dp"
+            android:contentDescription="GreenSight text"
+            android:scaleType="fitCenter"
+            android:src="@drawable/greensight_logotext"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/text_Configuration"/>
+
+        <TextView
+            android:id="@+id/text_Configuration"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:lineSpacingExtra="-4sp"
+            android:text="Configuration"
+            android:textColor="@color/aBlack"
+            android:textFontWeight="800"
+            android:textSize="32sp"
+
+            app:layout_constraintEnd_toStartOf="@id/logo_both"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <!--main body-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/main_body"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:padding="20dp"
+            app:layout_constraintTop_toBottomOf="@id/text_Configuration"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <!--card1-->
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_control_mode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/aWhite"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="10dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/card_settings"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="20dp">
+
+                    <TextView
+                        android:id="@+id/text_Control_Mode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Control Mode"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="@color/aBlack"
+                        android:textFontWeight="600"
+                        android:textSize="32sp"
+                        android:gravity="center"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <Button
+                        android:id="@+id/button_switch_fan"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/button_switch_roof"
+                        app:layout_constraintTop_toBottomOf="@id/text_Control_Mode"
+                        android:layout_marginHorizontal="10dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/squarish_button_toggle"
+
+                        android:text="Seedling Phase"
+                        android:textColor="@drawable/button_text_color_toggle"
+                        android:fontFamily="sans-serif"
+                        android:textFontWeight="500"
+                        android:elevation="20dp"/>
+
+                    <Button
+                        android:id="@+id/button_switch_roof"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/button_switch_fan"
+                        app:layout_constraintTop_toBottomOf="@id/text_Control_Mode"
+                        android:layout_marginHorizontal="10dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/squarish_button_toggle"
+
+                        android:text="Flowering Phase"
+                        android:textColor="@drawable/button_text_color_toggle"
+                        android:fontFamily="sans-serif"
+                        android:textFontWeight="500"
+                        android:elevation="20dp"/>
+                    <Button
+                        android:id="@+id/button_switch_mist"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/preset_manual"
+                        app:layout_constraintTop_toBottomOf="@id/button_switch_fan"
+                        android:layout_marginHorizontal="10dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/squarish_button_toggle"
+
+                        android:text="Vegetative Phase"
+                        android:textColor="@drawable/button_text_color_toggle"
+                        android:fontFamily="sans-serif"
+                        android:textFontWeight="500"
+                        android:elevation="20dp"/>
+                    <Button
+                        android:id="@+id/preset_manual"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/button_switch_mist"
+                        app:layout_constraintTop_toBottomOf="@id/button_switch_roof"
+                        android:layout_marginHorizontal="10dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/squarish_button_toggle"
+
+                        android:text="Manual Setting"
+                        android:textColor="@drawable/button_text_color_toggle"
+                        android:fontFamily="sans-serif"
+                        android:textFontWeight="500"
+                        android:elevation="20dp"/>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_settings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                app:cardBackgroundColor="@color/aWhite"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="10dp"
+                app:layout_constraintTop_toBottomOf="@id/card_control_mode"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/text_Settings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="20dp"
+                        android:text="Settings"
+                        android:fontFamily="sans-serif-medium"
+                        android:textColor="@color/aBlack"
+                        android:textFontWeight="600"
+                        android:textSize="32sp"
+                        android:gravity="center"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/main_setting_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/text_Settings"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:id="@+id/text_ranges"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center"
+                            android:text="Ranges"
+                            android:textColor="@color/aBlack"
+                            android:textFontWeight="600"
+                            android:textSize="20sp"
+                            android:layout_marginTop="20dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/img_temp"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:contentDescription="temp"
+                            android:src="@drawable/temperature_half_svgrepo_com"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/img_hum"
+                            app:layout_constraintTop_toBottomOf="@id/text_ranges"/>
+
+                        <ImageView
+                            android:id="@+id/img_hum"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:contentDescription="temp"
+                            android:src="@drawable/humidity_svgrepo_com"
+                            app:layout_constraintStart_toEndOf="@id/img_temp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/text_ranges"/>
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/main_setting_header"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginBottom="20dp">
+
+                        <TextView
+                            android:id="@+id/text_Low"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center"
+                            android:text="Low"
+                            android:textColor="@color/aBlack"
+                            android:textFontWeight="400"
+                            android:textSize="20sp"
+                            android:layout_marginTop="20dp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/textedit_low_temp"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/squarish_white"
+                            android:layout_marginHorizontal="10dp"
+                            android:gravity="center"
+                            android:hint="hint"
+                            app:layout_constraintTop_toBottomOf="@id/text_Low"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/textedit_low_hum"/>
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/textedit_low_hum"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/squarish_white"
+                            android:layout_marginHorizontal="10dp"
+                            android:gravity="center"
+                            android:hint="hint"
+                            app:layout_constraintTop_toBottomOf="@id/text_Low"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/textedit_low_temp"/>
+
+                        <TextView
+                            android:id="@+id/text_High"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center"
+                            android:text="High"
+                            android:textColor="@color/aBlack"
+                            android:textFontWeight="400"
+                            android:textSize="20sp"
+                            android:layout_marginTop="20dp"
+                            app:layout_constraintTop_toBottomOf="@id/textedit_low_temp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/textedit_high_temp"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/squarish_white"
+                            android:layout_marginHorizontal="10dp"
+                            android:gravity="center"
+                            android:hint="hint"
+                            app:layout_constraintTop_toBottomOf="@id/text_High"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/textedit_high_hum"/>
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/textedit_high_hum"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/squarish_white"
+                            android:layout_marginHorizontal="10dp"
+                            android:gravity="center"
+                            android:hint="hint"
+                            app:layout_constraintTop_toBottomOf="@id/text_High"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/textedit_high_temp"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                    <!-- You should remove this if wala ka nang choice
+                        tignan mo yung sa notepad++, yung shit
+                    -->
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

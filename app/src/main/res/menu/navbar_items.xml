@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/dashboardFragment"
+        android:icon="@drawable/dashboard_svgrepo_com"
+        android:title="@string/dashboard" />
+    <item
+        android:id="@+id/monitorFragment"
+        android:icon="@drawable/graph_svgrepo_com"
+        android:title="@string/monitor" />
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/tool_svgrepo_com"
+        android:title="@string/settings" />
+    <item
+        android:id="@+id/aboutFragment"
+        android:icon="@drawable/about_svgrepo_com"
+        android:title="@string/about_us" />
+</menu>

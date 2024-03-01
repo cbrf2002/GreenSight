@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgWhite"
+    tools:context=".MonitorFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/dashboard_main"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        android:fitsSystemWindows="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/logo_both"
+            android:layout_width="150dp"
+            android:layout_height="0dp"
+            android:contentDescription="GreenSight text"
+            android:scaleType="fitCenter"
+            android:src="@drawable/greensight_logotext"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/text_Monitoring"/>
+
+        <TextView
+            android:id="@+id/text_Monitoring"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:lineSpacingExtra="-4sp"
+            android:text="Monitoring"
+            android:textColor="@color/aBlack"
+            android:textFontWeight="800"
+            android:textSize="32sp"
+
+            app:layout_constraintEnd_toStartOf="@id/logo_both"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/main_body"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/text_Monitoring"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!--<com.google.android.material.tabs.TabLayout
+                android:id="@+id/temperature_graph_timeframe_tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/text_Temperature_Graph">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hour" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Day" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Week" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Month" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Year" />
+            </com.google.android.material.tabs.TabLayout> -->
+
+            <TextView
+                android:id="@+id/text_Temporary_Hourly"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="20dp"
+                android:text="Hourly Graph"
+                android:fontFamily="sans-serif-black"
+                android:textColor="@color/aBlack"
+                android:textFontWeight="900"
+                android:textSize="32sp"
+                android:gravity="center"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/text_Temperature_Graph"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="20dp"
+                android:text="Temperature"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/aBlack"
+                android:textFontWeight="600"
+                android:textSize="24sp"
+                android:gravity="center"
+                app:layout_constraintTop_toBottomOf="@id/text_Temporary_Hourly"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/graph_temp_card_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:clipToOutline="false"
+                android:clipChildren="false"
+                android:paddingVertical="20dp"
+                app:layout_constraintTop_toBottomOf="@id/text_Temperature_Graph">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/graph_temperature_card"
+                    android:layout_width="0dp"
+                    android:layout_height="250dp"
+                    android:layout_marginHorizontal="20dp"
+                    app:cardBackgroundColor="@color/aWhite"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/temp_line_chart"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layout_constraintTop_toBottomOf="@id/graph_temperature_card"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/text_Humidity_Graph"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="20dp"
+                android:text="Humidity"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/aBlack"
+                android:textFontWeight="600"
+                android:textSize="24sp"
+                android:gravity="center"
+                app:layout_constraintTop_toBottomOf="@id/graph_temp_card_holder"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/graph_humidity_card_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:clipToOutline="false"
+                android:clipChildren="false"
+                android:paddingVertical="20dp"
+                app:layout_constraintTop_toBottomOf="@id/text_Humidity_Graph">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/graph_humidity_card"
+                    android:layout_width="0dp"
+                    android:layout_height="250dp"
+                    android:layout_marginHorizontal="20dp"
+                    app:cardBackgroundColor="@color/aWhite"
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/humidity_line_chart"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layout_constraintTop_toBottomOf="@id/graph_humidity_card"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

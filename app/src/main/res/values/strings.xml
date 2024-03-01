@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">GreenSight</string>
+    <string name="morning">Good Morning!</string>
+    <string name="afternoon">Good Afternoon!</string>
+    <string name="evening">Good Evening!</string>
+    <string name="mode">Auto</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="monitor">Monitor</string>
+    <string name="settings">Config</string>
+    <string name="about_us">About Us</string>
+</resources>

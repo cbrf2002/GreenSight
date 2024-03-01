@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/dashboardFragment">
+
+    <!-- Define DashboardFragment -->
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.cpe211.greensight.DashboardFragment"
+        android:label="Dashboard">
+        <!-- Define actions for DashboardFragment -->
+        <action
+            android:id="@+id/action_dashboard_to_monitor"
+            app:destination="@id/monitorFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_settings"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+    </fragment>
+
+    <!-- Define MonitorFragment -->
+    <fragment
+        android:id="@+id/monitorFragment"
+        android:name="com.cpe211.greensight.MonitorFragment"
+        android:label="Monitor">
+        <!-- Define actions for MonitorFragment -->
+        <action
+            android:id="@+id/action_monitor_to_dashboard"
+            app:destination="@id/dashboardFragment" />
+        <action
+            android:id="@+id/action_monitor_to_settings"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_monitorFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+    </fragment>
+
+    <!-- Define SettingsFragment -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.cpe211.greensight.SettingsFragment"
+        android:label="Settings">
+        <!-- Define actions for SettingsFragment -->
+        <action
+            android:id="@+id/action_settings_to_dashboard"
+            app:destination="@id/dashboardFragment" />
+        <action
+            android:id="@+id/action_settings_to_monitor"
+            app:destination="@id/monitorFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_aboutFragment"
+            app:destination="@id/aboutFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="com.cpe211.greensight.AboutFragment"
+        android:label="About">
+
+        <action
+            android:id="@+id/action_aboutFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+        <action
+            android:id="@+id/action_aboutFragment_to_monitorFragment"
+            app:destination="@id/monitorFragment" />
+        <action
+            android:id="@+id/action_aboutFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+</navigation>
