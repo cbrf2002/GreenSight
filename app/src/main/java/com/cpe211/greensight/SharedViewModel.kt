@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.widget.TextView
 import androidx.lifecycle.AndroidViewModel
 import com.cpe211.greensight.db.AppDatabase
@@ -20,6 +21,13 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private val temperatureDataDao: TemperatureDataDao
     private val humidityDataDao: HumidityDataDao
     private val timerScope = CoroutineScope(Dispatchers.Default)
+    private val sharedPreferences: SharedPreferences = application.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+    private var temperatureLow: Int = 0
+    private var temperatureHigh: Int = 0
+    private var humidityLow: Int = 0
+    private var humidityHigh: Int = 0
+    private var temperatureInt: Int = 0
+    private var humidityInt: Int = 0
 
     init {
         val database = AppDatabase.getDatabase(application.applicationContext)
@@ -35,14 +43,6 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         return humidityDataDao.getHumidityDataInRange(startTime, endTime)
     }
 
-    suspend fun getAllTemperatureData(): List<TemperatureData> {
-        return temperatureDataDao.getAllTemperatureData()
-    }
-
-    suspend fun getAllHumidityData(): List<HumidityData> {
-        return humidityDataDao.getAllHumidityData()
-    }
-
     fun getIPAddress(context: Context): String {
         val sharedPref = context.getSharedPreferences("ip_pref", Context.MODE_PRIVATE)
         return sharedPref.getString("ip_address", "") ?: ""
@@ -51,35 +51,35 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun fetchData(endpoint: String, ipAddress: String, client: OkHttpClient): String? =
         suspendCancellableCoroutine { continuation ->
-        val url = "http://$ipAddress/$endpoint"
-        val request = Request.Builder().url(url).build()
-        val call = client.newCall(request)
+            val url = "http://$ipAddress/$endpoint"
+            val request = Request.Builder().url(url).build()
+            val call = client.newCall(request)
 
-        continuation.invokeOnCancellation {
-            call.cancel()
-        }
-
-        call.enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                continuation.resume(null) {
-                    call.cancel()
-                }
+            continuation.invokeOnCancellation {
+                call.cancel()
             }
 
-            override fun onResponse(call: Call, response: Response) {
-                try {
-                    val data = response.body?.string()
-                    continuation.resume(data) {
-                        response.close()
-                    }
-                } catch (e: Exception) {
+            call.enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
                     continuation.resume(null) {
-                        response.close()
+                        call.cancel()
                     }
                 }
-            }
-        })
-    }
+
+                override fun onResponse(call: Call, response: Response) {
+                    try {
+                        val data = response.body?.string()
+                        continuation.resume(data) {
+                            response.close()
+                        }
+                    } catch (e: Exception) {
+                        continuation.resume(null) {
+                            response.close()
+                        }
+                    }
+                }
+            })
+        }
 
     private suspend fun fetchTemperature(ipAddress: String, client: OkHttpClient): String? =
         fetchData("temperature", ipAddress, client)
@@ -97,6 +97,15 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             try {
                 val temperature = fetchTemperature(ipAddress, client)
                 val humidity = fetchHumidity(ipAddress, client)
+
+                temperatureInt = temperature?.toIntOrNull() ?: 0
+                humidityInt = humidity?.toIntOrNull() ?: 0
+
+                with(sharedPreferences.edit()) {
+                    putInt("temperature_int", temperatureInt)
+                    putInt("humidity_int", humidityInt)
+                    apply()
+                }
 
                 // Update UI with temperature and humidity values
                 temperatureTextView.post {
@@ -198,5 +207,52 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                 delay(10000) // Fetch data every 10 seconds
             }
         }
+    }
+
+    fun updatePhaseSettings(phase: String, lowTemp: Int, highTemp: Int, lowHum: Int, highHum: Int) {
+        // Update SharedPreferences with the selected phase and temperature/humidity ranges
+        with(sharedPreferences.edit()) {
+            putString("selected_phase", phase)
+            putInt("low_temp", lowTemp)
+            putInt("high_temp", highTemp)
+            putInt("low_hum", lowHum)
+            putInt("high_hum", highHum)
+            apply()
+        }
+        // Update the values in the ViewModel
+        temperatureLow = lowTemp
+        temperatureHigh = highTemp
+        humidityLow = lowHum
+        humidityHigh = highHum
+    }
+
+    fun updateManualMode() {
+        // Update SharedPreferences with manual mode
+        with(sharedPreferences.edit()) {
+            putString("selected_phase", "Manual")
+            apply()
+        }
+    }
+    fun getTemperatureLow(): Int {
+        return sharedPreferences.getInt("low_temp", 0)
+    }
+
+    fun getTemperatureHigh(): Int {
+        return sharedPreferences.getInt("high_temp", 0)
+    }
+
+    fun getHumidityLow(): Int {
+        return sharedPreferences.getInt("low_hum", 0)
+    }
+
+    fun getHumidityHigh(): Int {
+        return sharedPreferences.getInt("high_hum", 0)
+    }
+
+    fun getTemperatureInt(): Int {
+        return sharedPreferences.getInt("temperature_int",0)
+    }
+    fun getHumidityInt(): Int {
+        return sharedPreferences.getInt("humidity_int",0)
     }
 }

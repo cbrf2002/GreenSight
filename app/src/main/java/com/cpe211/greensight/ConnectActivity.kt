@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 class ConnectActivity : AppCompatActivity() {
 
@@ -25,6 +26,8 @@ class ConnectActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_connect)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.bgWhite)
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.bgWhite)
 
         val nameEnterText = findViewById<EditText>(R.id.textfield_enter_name)
         val ipAddressEditText = findViewById<EditText>(R.id.textfield_enter_IP)
@@ -94,15 +97,20 @@ class ConnectActivity : AppCompatActivity() {
                     startActivity(Intent(applicationContext, MainActivity::class.java))
                     finish()
                 } else if (pingSuccessful) {
-                        Toast.makeText(applicationContext, "Connected to NodeMCU", Toast.LENGTH_SHORT).show()
-                        // Start the MainActivity
-                        startActivity(Intent(applicationContext, MainActivity::class.java))
-                        finish()
+                    Toast.makeText(applicationContext, "Connected to NodeMCU", Toast.LENGTH_SHORT).show()
+                    // Proceed with further actions after successful connection
+                    proceedAfterConnection()
                 } else {
                     Toast.makeText(applicationContext, "Failed to connect to NodeMCU", Toast.LENGTH_SHORT).show()
                 }
             }
         }.start()
+    }
+
+    private fun proceedAfterConnection() {
+        // Additional actions to take after successful connection, such as starting a new activity
+        startActivity(Intent(applicationContext, MainActivity::class.java))
+        finish()
     }
 
     private fun pingIPAddress(ipAddress: String): Boolean {

@@ -4,12 +4,16 @@
         <shape android:shape="rectangle">
             <corners android:radius="60dp" />
             <solid android:color="@color/aWhite" />
+            <stroke android:color="@color/halfGray"/>
+            <stroke android:width="2dp"/>
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="60dp" />
             <solid android:color="@color/aGreen" />
+            <stroke android:color="@color/halfGray"/>
+            <stroke android:width="2dp"/>
         </shape>
     </item>
 </selector>

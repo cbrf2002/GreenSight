@@ -39,6 +39,7 @@ class MonitorFragment : Fragment() {
         private val INTERVAL_LAST_24_HOURS = TimeUnit.DAYS.toMillis(1)
         private val INTERVAL_LAST_7_DAYS = TimeUnit.DAYS.toMillis(7)
         private val INTERVAL_LAST_30_DAYS = TimeUnit.DAYS.toMillis(30)
+
         private val INTERVAL_LAST_12_MONTHS = TimeUnit.DAYS.toMillis(365)
     }
 
@@ -133,6 +134,7 @@ class MonitorFragment : Fragment() {
         val temperatureDataSet = LineDataSet(temperatureEntries, "")
         temperatureDataSet.color = ContextCompat.getColor(requireContext(), R.color.aGreen)
         temperatureDataSet.setDrawCircles(false)
+        temperatureDataSet.setDrawValues(false)
         //temperatureDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
         val lineData = LineData(temperatureDataSet)
@@ -166,6 +168,7 @@ class MonitorFragment : Fragment() {
         val humidityDataSet = LineDataSet(humidityEntries, "")
         humidityDataSet.color = ContextCompat.getColor(requireContext(), R.color.aGreen)
         humidityDataSet.setDrawCircles(false)
+        humidityDataSet.setDrawValues(false)
         //humidityDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
         val lineData = LineData(humidityDataSet)

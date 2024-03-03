@@ -75,7 +75,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingHorizontal="10dp"
-                    android:paddingVertical="20dp">
+                    android:paddingVertical="40dp"
+                    android:clipToPadding="false">
 
                     <TextView
                         android:id="@+id/text_Control_Mode"
@@ -321,6 +322,36 @@
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@id/textedit_high_temp"/>
 
+                        <TextView
+                            android:id="@+id/text_range_info"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:gravity="center"
+                            android:textColor="@color/aBlack"
+                            android:textFontWeight="400"
+                            android:textSize="12sp"
+                            android:layout_marginTop="20dp"
+                            app:layout_constraintStart_toStartOf="@id/textedit_high_temp"
+                            app:layout_constraintEnd_toEndOf="@id/textedit_high_hum"
+                            app:layout_constraintTop_toBottomOf="@id/textedit_high_temp"/>
+
+                        <Button
+                            android:id="@+id/button_submit_manual_mode"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="10dp"
+                            android:layout_marginVertical="20dp"
+                            android:textSize="20sp"
+                            android:text="Submit Manual Range"
+                            android:padding="10dp"
+                            android:clipToPadding="false"
+                            android:clipChildren="false"
+                            android:textColor="@drawable/button_text_color_toggle_dash"
+                            android:background="@drawable/rounded_button_toggle"
+                            app:layout_constraintStart_toStartOf="@id/text_range_info"
+                            app:layout_constraintEnd_toEndOf="@id/text_range_info"
+                            app:layout_constraintTop_toBottomOf="@id/text_range_info"/>
                     </androidx.constraintlayout.widget.ConstraintLayout>
                     <!-- You should remove this if wala ka nang choice
                         tignan mo yung sa notepad++, yung shit

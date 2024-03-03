@@ -1,5 +1,4 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true" android:color="@color/bgWhite" />
-    <item android:state_enabled="true" android:color="@color/aBlack" />
-    <item android:color="@color/halfGray" />
+    <item android:color="@color/aBlack" />
 </selector>

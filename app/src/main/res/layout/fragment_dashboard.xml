@@ -93,7 +93,7 @@
                 android:clipToOutline="false"
                 android:clipChildren="false"
                 app:layout_constraintTop_toBottomOf="@id/text_Dashboard"
-                app:layout_constraintBottom_toTopOf="@id/cardtext_current_preset">
+                app:layout_constraintBottom_toTopOf="@id/button_operation_mode">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/temperature_card"
@@ -226,36 +226,21 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/cardtext_current_preset"
+            <Button
+                android:id="@+id/button_operation_mode"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginVertical="20dp"
                 android:padding="30dp"
                 android:clipToPadding="false"
-                android:clipToOutline="false"
                 android:clipChildren="false"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="10dp"
-                app:cardBackgroundColor="@color/aWhite"
+                android:textColor="@drawable/button_text_color_toggle_dash"
+                android:background="@drawable/rounded_button_toggle"
                 app:layout_constraintStart_toStartOf="@id/temp_and_hum_cards"
                 app:layout_constraintEnd_toEndOf="@id/temp_and_hum_cards"
                 app:layout_constraintTop_toBottomOf="@id/temp_and_hum_cards"
-                app:layout_constraintBottom_toTopOf="@id/component_switches">
-
-                <TextView
-                    android:id="@+id/text_current_preset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:textAlignment="center"
-                    android:text="PLACEHOLDER"
-                    android:fontFamily="sans-serif"
-                    android:layout_margin="20dp"
-                    android:textSize="30sp"/>
-
-            </androidx.cardview.widget.CardView>
+                app:layout_constraintBottom_toTopOf="@id/component_switches"/>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/component_switches"
@@ -270,7 +255,23 @@
                 android:clipChildren="false"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardtext_current_preset">
+                app:layout_constraintTop_toBottomOf="@id/button_operation_mode">
+
+                <TextView
+                    android:id="@+id/text_components"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Components"
+                    android:textSize="32sp"
+                    android:textColor="@color/aBlack"
+                    android:fontFamily="sans-serif-medium"
+                    android:textAlignment="center"
+                    android:textFontWeight="800"
+
+                    android:layout_marginTop="20dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
 
                 <Button
                     android:id="@+id/button_switch_fan"
@@ -278,10 +279,11 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/button_switch_roof"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/text_components"
                     android:layout_marginHorizontal="10dp"
                     android:background="@drawable/squarish_button_toggle_dashboard"
 
+                    android:layout_marginTop="20dp"
                     android:text="Fan"
                     android:textColor="@drawable/button_text_color_toggle"
                     android:fontFamily="sans-serif"
@@ -294,10 +296,11 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/button_switch_fan"
-                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/text_components"
                     android:layout_marginHorizontal="10dp"
                     android:background="@drawable/squarish_button_toggle_dashboard"
 
+                    android:layout_marginTop="20dp"
                     android:text="Roof"
                     android:textColor="@drawable/button_text_color_toggle"
                     android:fontFamily="sans-serif"
@@ -326,6 +329,20 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/text_range_info_dash"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:textColor="@color/aBlack"
+        android:textFontWeight="400"
+        android:textSize="12sp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/debugtext"/>
 
     <TextView
         android:id="@+id/debugtext"

@@ -6,9 +6,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.cpe211.greensight.databinding.ActivityMainBinding
 import androidx.navigation.ui.setupWithNavController
+import androidx.viewpager2.widget.ViewPager2
+import com.cpe211.greensight.databinding.ActivityMainBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,25 +25,28 @@ class MainActivity : AppCompatActivity() {
         window.statusBarColor = ContextCompat.getColor(this, R.color.bgWhite)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.aWhite)
 
-        sharedViewModel = ViewModelProvider(this).get(SharedViewModel::class.java)
+        sharedViewModel = ViewModelProvider(this)[SharedViewModel::class.java]
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.nav_bar_main)
+        val viewPager = findViewById<ViewPager2>(R.id.viewPager)
+
+        viewPager.adapter = ViewPagerAdapter(this)
+        viewPager.isUserInputEnabled = false // Disable swipe gesture to switch pages
+
         bottomNavigationView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.dashboardFragment) {
-                supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(
-                        R.anim.fade_in,  // Entering animation
-                        R.anim.fade_out, // Exiting animation
-                        R.anim.fade_in,  // Pop-enter animation
-                        R.anim.fade_out  // Pop-exit animation
-                    )
-                    .commit()
+            val fragmentId = when (destination.id) {
+                R.id.dashboardFragment -> 0
+                R.id.monitorFragment -> 1
+                R.id.settingsFragment -> 2
+                R.id.aboutFragment -> 3
+                else -> -1
             }
+            viewPager.setCurrentItem(fragmentId, true)
         }
     }
 }
