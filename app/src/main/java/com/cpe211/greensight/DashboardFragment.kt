@@ -1,7 +1,8 @@
 package com.cpe211.greensight
 
-
 import android.animation.ObjectAnimator
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,9 +10,9 @@ import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 
 class DashboardFragment : Fragment() {
@@ -30,14 +31,17 @@ class DashboardFragment : Fragment() {
     private lateinit var buttonRoof: Button
     private lateinit var buttonMist: Button
     private lateinit var sharedViewModel: SharedViewModel
+    private lateinit var sharedPreferences: SharedPreferences
+
 
     private lateinit var debugtext: TextView
     private lateinit var textRangeInfoDash: TextView
-    private var temperature: Float = 0.0f
-    private var humidity: Float = 0.0f
 
     private val client = OkHttpClient()
     private var isAutoMode: Boolean = true
+
+    private val refreshInterval = 5000L // 5 seconds
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
 
     override fun onCreateView(
@@ -52,6 +56,7 @@ class DashboardFragment : Fragment() {
 
         // Initialize your views and other properties
         sharedViewModel = ViewModelProvider(requireActivity())[SharedViewModel::class.java]
+        sharedPreferences = requireActivity().getSharedPreferences("dashboard_prefs", Context.MODE_PRIVATE)
         username = sharedViewModel.getUserName(requireContext())
         ipAddress = sharedViewModel.getIPAddress(requireContext())
 
@@ -68,15 +73,13 @@ class DashboardFragment : Fragment() {
         val textViewUsername = view.findViewById<TextView>(R.id.text_Owner)
         textViewUsername.text = if (username.isEmpty()) "Greensight's Greenhouse" else "$username's Greenhouse"
 
-
-        temperature = sharedViewModel.getTemperature(requireContext())
-        humidity = sharedViewModel.getHumidity(requireContext())
-        val temperatureInt = sharedViewModel.getTemperatureInt()
-        val humidityInt = sharedViewModel.getHumidityInt()
-
         mistControl = MistControl(ipAddress)
         fanControl = FanControl(ipAddress)
         roofControl = RoofControl(ipAddress)
+
+        sharedViewModel.temperatureAndHumidityUpdate.observe(viewLifecycleOwner) {
+            updateTemperatureAndHumidity(sharedViewModel.temperature, sharedViewModel.humidity)
+        }
 
         buttonOperationMode.setOnClickListener {
             isAutoMode = !isAutoMode
@@ -85,12 +88,35 @@ class DashboardFragment : Fragment() {
             updateButtonState()
         }
 
-        controlButtonsBasedOnThresholds(temperatureInt, humidityInt)
-
+        isAutoMode = sharedPreferences.getBoolean("is_auto_mode", false)
         updateOperationModeUI()
         updateButtonState()
 
         buttonClickers()
+
+        sharedViewModel.startUpdatingTemperatureAndHumidity(
+            ipAddress,
+            client,
+            temperatureTextView,
+            humidityTextView
+        )
+
+        startDataRefreshCoroutine()
+    }
+    private fun startDataRefreshCoroutine() {
+        coroutineScope.launch {
+            while (isActive) {
+                // Refresh data
+                refreshData()
+
+                // Delay for 5 seconds before the next refresh
+                delay(refreshInterval)
+            }
+        }
+    }
+
+    private fun refreshData() {
+        // Implement data refresh logic here
         sharedViewModel.startUpdatingTemperatureAndHumidity(
             ipAddress,
             client,
@@ -99,9 +125,25 @@ class DashboardFragment : Fragment() {
         )
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Cancel the coroutine when the view is destroyed
+        coroutineScope.cancel()
+    }
+
+
     private fun toggleButton(button: Button) {
         // Toggle the selected state of the button
         button.isSelected = !button.isSelected
+    }
+
+    private fun updateTemperatureAndHumidity(temperature: Float, humidity: Float) {
+        // Update UI with temperature and humidity
+        temperatureTextView.text = "$temperature °C"
+        humidityTextView.text = "$humidity %"
+
+        // Call the method to update button states based on thresholds
+        controlButtonsBasedOnThresholds(temperature, humidity)
     }
 
     private fun animateButton(button: Button) {
@@ -145,13 +187,13 @@ class DashboardFragment : Fragment() {
     }
 
     private fun handleActionResponse(success: Boolean, message: String) {
-        activity?.runOnUiThread {
+        /*activity?.runOnUiThread {
             if (success) {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             }
-        }
+        }*/
     }
     private fun buttonClickers() {
         buttonFan.setOnClickListener {
@@ -182,50 +224,91 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    private fun controlButtonsBasedOnThresholds(temperatureInt: Int, humidityInt: Int) {
+    private fun controlButtonsBasedOnThresholds(temperature: Float, humidity: Float) {
         val lowTemp = sharedViewModel.getTemperatureLow()
         val highTemp = sharedViewModel.getTemperatureHigh()
         val lowHum = sharedViewModel.getHumidityLow()
         val highHum = sharedViewModel.getHumidityHigh()
         textRangeInfoDash.text =
-            "Temperature: $lowTemp°C - $highTemp°C, Humidity: $lowHum% - $highHum%, CurTemp: $temperatureInt, CurHum: $humidityInt"
+            "Temperature: $lowTemp°C - $highTemp°C, Humidity: $lowHum% - $highHum%, CurTemp: $temperature, CurHum: $humidity"
 
         if (isAutoMode) {
             // Auto mode logic
-            if (temperatureInt < lowTemp) {
-                Toast.makeText(requireContext(), "temp<lowtemp", Toast.LENGTH_SHORT).show()
-                // Below low temperature threshold
-                enableButtonsIfNeeded()
-                buttonMist.performClick() // Activate mist
-                buttonFan.performClick() // Activate fan
-                buttonRoof.performClick() // Close roof
-            } else if (temperatureInt > highTemp) {
-                // Above high temperature threshold
-                Toast.makeText(requireContext(), "temp>hightemp", Toast.LENGTH_SHORT).show()
-                enableButtonsIfNeeded()
-                buttonMist.performClick() // Activate mist
-                buttonFan.performClick() // Activate fan
-                buttonRoof.performClick() // Open roof
-            } else {
-                // Within temperature range
-                if (humidityInt < lowHum) {
-                    // Below low humidity threshold
-                    enableButtonsIfNeeded()
-                    Toast.makeText(requireContext(), "hum<lowhum", Toast.LENGTH_SHORT).show()
-                    buttonMist.performClick() // Activate mist
-                    buttonRoof.performClick() // Close roof
-                } else if (humidityInt > highHum) {
-                    // Above high humidity threshold
-                    enableButtonsIfNeeded()
-                    Toast.makeText(requireContext(), "hum>highhum", Toast.LENGTH_SHORT).show()
-                    buttonRoof.performClick() // Open roof
-                } else {
-                    // Within humidity range
-                    enableButtonsIfNeeded()
-                    Toast.makeText(requireContext(), "optimal", Toast.LENGTH_SHORT).show()
-                    buttonMist.performClick() // Deactivate mist
-                    buttonRoof.performClick() // Close roof
-                    buttonFan.performClick() // Deactivate fan
+            when {
+                humidity < highHum && temperature < lowTemp -> {
+                    // Low Humidity / Low Temperature
+                    buttonMist.isSelected = true
+                    buttonFan.isSelected = false
+                    buttonRoof.isSelected = false
+                    sharedViewModel.controlActuator("mistOn", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("fanOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("roofOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                }
+                humidity < highHum && temperature >= highTemp -> {
+                    // Low Humidity / High Temperature
+                    buttonMist.isSelected = true
+                    buttonFan.isSelected = true
+                    buttonRoof.isSelected = false
+                    sharedViewModel.controlActuator("mistOn", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("fanOn", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("roofOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                }
+                humidity >= highHum && temperature < lowTemp -> {
+                    // High Humidity / Low Temperature
+                    buttonMist.isSelected = false
+                    buttonFan.isSelected = true
+                    buttonRoof.isSelected = false
+                    sharedViewModel.controlActuator("mistOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("fanOn", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("roofOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                }
+                humidity >= highHum && temperature >= highTemp -> {
+                    // High Humidity / High Temperature
+                    buttonMist.isSelected = false
+                    buttonFan.isSelected = true
+                    buttonRoof.isSelected = true
+                    sharedViewModel.controlActuator("mistOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("fanOn", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("roofOn", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                }
+                else -> {
+                    // Optimal Condition
+                    buttonMist.isSelected = false
+                    buttonFan.isSelected = false
+                    buttonRoof.isSelected = false
+                    sharedViewModel.controlActuator("mistOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("fanOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
+                    sharedViewModel.controlActuator("roofOff", ipAddress, client) { success, message ->
+                        handleActionResponse(success, message)
+                    }
                 }
             }
         }
@@ -236,5 +319,10 @@ class DashboardFragment : Fragment() {
         buttonFan.isEnabled = true
         buttonRoof.isEnabled = true
         buttonMist.isEnabled = true
+    }
+    override fun onStop() {
+        super.onStop()
+        // Save the state of the operation mode button
+        sharedPreferences.edit().putBoolean("is_auto_mode", isAutoMode).apply()
     }
 }

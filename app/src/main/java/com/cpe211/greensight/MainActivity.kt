@@ -1,7 +1,10 @@
 package com.cpe211.greensight
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.WindowInsetsController
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -18,12 +21,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var sharedViewModel: SharedViewModel
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.statusBarColor = ContextCompat.getColor(this, R.color.bgWhite)
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.aWhite)
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.bgWhite)
+        window.isStatusBarContrastEnforced = true
+        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 
         sharedViewModel = ViewModelProvider(this)[SharedViewModel::class.java]
 

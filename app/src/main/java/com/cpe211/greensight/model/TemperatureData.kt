@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class TemperatureData(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-    val temperatureValue: Double,
+    val temperatureValue: Float,
     val timestamp: Long = System.currentTimeMillis() // Store timestamp as Long
 )

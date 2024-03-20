@@ -32,7 +32,6 @@ class MonitorFragment : Fragment() {
     private lateinit var sharedViewModel: SharedViewModel
     private lateinit var ipAddress: String
     private val client = OkHttpClient()
-    //private var periodicJob: Job? = null
 
     companion object {
         private val INTERVAL_LAST_HOUR = TimeUnit.HOURS.toMillis(1)
@@ -73,28 +72,6 @@ class MonitorFragment : Fragment() {
 
         return view
     }
-    /*override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        //startPeriodicDataFetching()
-    }*/
-    /*private fun startPeriodicDataFetching() {
-        periodicJob = viewLifecycleOwner.lifecycleScope.launch {
-            while (isActive) {
-                fetchDataAndDisplay() // Fetch and display data
-
-                delay(10000) // Fetch data every 10 seconds
-            }
-        }
-    }
-
-    private fun stopPeriodicDataFetching() {
-        periodicJob?.cancel() // Cancel the periodic job when the fragment is destroyed or paused
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        stopPeriodicDataFetching() // Stop the periodic data fetching when the view is destroyed
-    }*/
 
     private fun getIPAddressFromSharedPreferences(): String {
         // Example of retrieving ipAddress from SharedPreferences
@@ -128,14 +105,14 @@ class MonitorFragment : Fragment() {
         val temperatureEntries = mutableListOf<Entry>()
 
         temperatureData.forEachIndexed { index, data ->
-            temperatureEntries.add(Entry(index.toFloat(), data.temperatureValue.toFloat()))
+            temperatureEntries.add(Entry(index.toFloat(), data.temperatureValue)) // Pass Float value
         }
 
         val temperatureDataSet = LineDataSet(temperatureEntries, "")
         temperatureDataSet.color = ContextCompat.getColor(requireContext(), R.color.aGreen)
         temperatureDataSet.setDrawCircles(false)
         temperatureDataSet.setDrawValues(false)
-        //temperatureDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
+        temperatureDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
         val lineData = LineData(temperatureDataSet)
         temperatureLineChart.data = lineData
@@ -162,14 +139,14 @@ class MonitorFragment : Fragment() {
         val humidityEntries = mutableListOf<Entry>()
 
         humidityData.forEachIndexed { index, data ->
-            humidityEntries.add(Entry(index.toFloat(), data.humidityValue.toFloat()))
+            humidityEntries.add(Entry(index.toFloat(), data.humidityValue)) // Pass Float value
         }
 
         val humidityDataSet = LineDataSet(humidityEntries, "")
         humidityDataSet.color = ContextCompat.getColor(requireContext(), R.color.aGreen)
         humidityDataSet.setDrawCircles(false)
         humidityDataSet.setDrawValues(false)
-        //humidityDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
+        humidityDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
         val lineData = LineData(humidityDataSet)
 
@@ -193,37 +170,4 @@ class MonitorFragment : Fragment() {
         humidityLineChart.description.isEnabled = false
         humidityLineChart.invalidate()
     }
-
-    /*
-    private fun fetchDataAndDisplay() {
-        lifecycleScope.launch {
-            val temperatureData = sharedViewModel.getAllTemperatureData()
-            val humidityData = sharedViewModel.getAllHumidityData()
-        }
-    }
-
-    private fun buildDisplayText(
-        temperatureData: List<TemperatureData>,
-        humidityData: List<HumidityData>
-    ): String {
-        val stringBuilder = StringBuilder()
-        stringBuilder.append("Temperature Data:\n")
-        for (data in temperatureData) {
-            stringBuilder.append("${convertTimestampToString(data.timestamp)}: ${data.temperatureValue} °C\n")
-        }
-
-        stringBuilder.append("\nHumidity Data:\n")
-        for (data in humidityData) {
-            stringBuilder.append("${convertTimestampToString(data.timestamp)}: ${data.humidityValue} %\n")
-        }
-
-        return stringBuilder.toString()
-    }
-
-    private fun convertTimestampToString(timestamp: Long): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val date = Date(timestamp)
-        return dateFormat.format(date)
-    }
-    */
 }

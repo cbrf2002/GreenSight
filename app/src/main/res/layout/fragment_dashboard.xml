@@ -17,6 +17,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_vertical_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_horizontal_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
+
         <ImageView
             android:id="@+id/logo_both"
             android:layout_width="150dp"
@@ -232,7 +246,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginVertical="20dp"
-                android:padding="30dp"
+                android:padding="20dp"
+                android:textSize="20sp"
                 android:clipToPadding="false"
                 android:clipChildren="false"
                 android:textColor="@drawable/button_text_color_toggle_dash"

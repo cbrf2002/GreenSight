@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class HumidityData(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
-    val humidityValue: Double,
+    val humidityValue: Float,
     val timestamp: Long = System.currentTimeMillis() // Store timestamp as Long
 )

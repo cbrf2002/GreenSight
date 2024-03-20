@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.widget.TextView
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.cpe211.greensight.db.AppDatabase
 import com.cpe211.greensight.db.dao.HumidityDataDao
 import com.cpe211.greensight.db.dao.TemperatureDataDao
@@ -22,12 +24,17 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private val humidityDataDao: HumidityDataDao
     private val timerScope = CoroutineScope(Dispatchers.Default)
     private val sharedPreferences: SharedPreferences = application.getSharedPreferences("Settings", Context.MODE_PRIVATE)
-    private var temperatureLow: Int = 0
-    private var temperatureHigh: Int = 0
-    private var humidityLow: Int = 0
-    private var humidityHigh: Int = 0
-    private var temperatureInt: Int = 0
-    private var humidityInt: Int = 0
+    private var temperatureLow: Float = 0.0f
+    private var temperatureHigh: Float = 0.0f
+    private var humidityLow: Float = 0.0f
+    private var humidityHigh: Float = 0.0f
+    private var _temperature: Float = 0.0f
+    val temperature: Float
+        get() = _temperature
+
+    private var _humidity: Float = 0.0f
+    val humidity: Float
+        get() = _humidity
 
     init {
         val database = AppDatabase.getDatabase(application.applicationContext)
@@ -95,37 +102,31 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     ) {
         viewModelScope.launch {
             try {
-                val temperature = fetchTemperature(ipAddress, client)
-                val humidity = fetchHumidity(ipAddress, client)
-
-                temperatureInt = temperature?.toIntOrNull() ?: 0
-                humidityInt = humidity?.toIntOrNull() ?: 0
-
-                with(sharedPreferences.edit()) {
-                    putInt("temperature_int", temperatureInt)
-                    putInt("humidity_int", humidityInt)
-                    apply()
-                }
+                val temperatureString = fetchTemperature(ipAddress, client)
+                val humidityString = fetchHumidity(ipAddress, client)
 
                 // Update UI with temperature and humidity values
                 temperatureTextView.post {
-                    val formattedTemp = temperature?.let { "$it °C" } ?: "N/A"
+                    val formattedTemp = temperatureString?.let { "$it °C" } ?: "N/A"
                     temperatureTextView.text = formattedTemp
                 }
 
                 humidityTextView.post {
-                    val formattedHumidity = humidity?.let { "$it %" } ?: "N/A"
+                    val formattedHumidity = humidityString?.let { "$it %" } ?: "N/A"
                     humidityTextView.text = formattedHumidity
                 }
 
                 // Save temperature and humidity data
-                temperature?.toDoubleOrNull()?.let {
-                    saveTemperatureData(TemperatureData(temperatureValue = it, timestamp = System.currentTimeMillis()))
+                temperatureString?.toDoubleOrNull()?.let {
+                    _temperature = it.toFloat()
                 }
 
-                humidity?.toDoubleOrNull()?.let {
-                    saveHumidityData(HumidityData(humidityValue = it, timestamp = System.currentTimeMillis()))
+                humidityString?.toDoubleOrNull()?.let {
+                    _humidity = it.toFloat()
                 }
+
+                // Notify observers about the changes in temperature and humidity
+                notifyTemperatureAndHumidityUpdated()
             } catch (e: Exception) {
                 // Handle exceptions
                 e.printStackTrace()
@@ -136,20 +137,19 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    private val _temperatureAndHumidityUpdate = MutableLiveData<Unit>()
+    val temperatureAndHumidityUpdate: LiveData<Unit>
+        get() = _temperatureAndHumidityUpdate
+
+    private fun notifyTemperatureAndHumidityUpdated() {
+        _temperatureAndHumidityUpdate.value = Unit
+    }
+
     fun getUserName(context: Context): String {
         val sharedPref = context.getSharedPreferences("username_pref", Context.MODE_PRIVATE)
         return sharedPref.getString("user_name", "") ?: ""
     }
 
-    fun getTemperature(context: Context): Float {
-        val sharedPref = context.getSharedPreferences("temperature_pref", Context.MODE_PRIVATE)
-        return sharedPref.getFloat("temperature", -1.0f) // Default value is -1.0f
-    }
-
-    fun getHumidity(context: Context): Float {
-        val sharedPref = context.getSharedPreferences("humidity_pref", Context.MODE_PRIVATE)
-        return sharedPref.getFloat("humidity", -1.0f) // Default value is -1.0f
-    }
 
     fun controlActuator(
         action: String,
@@ -180,11 +180,11 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
     private suspend fun fetchAndSaveData(ipAddress: String, client: OkHttpClient) {
         val currentTime = Calendar.getInstance().timeInMillis
 
-        fetchTemperature(ipAddress, client)?.toDoubleOrNull()?.let {
+        fetchTemperature(ipAddress, client)?.toFloatOrNull()?.let {
             saveTemperatureData(TemperatureData(temperatureValue = it, timestamp = currentTime))
         }
 
-        fetchHumidity(ipAddress, client)?.toDoubleOrNull()?.let {
+        fetchHumidity(ipAddress, client)?.toFloatOrNull()?.let {
             saveHumidityData(HumidityData(humidityValue = it, timestamp = currentTime))
         }
     }
@@ -204,19 +204,19 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
         timerScope.launch {
             while (isActive) {
                 fetchAndSaveData(ipAddress, client)
-                delay(10000) // Fetch data every 10 seconds
+                delay(5000) // Fetch data every 10 seconds
             }
         }
     }
 
-    fun updatePhaseSettings(phase: String, lowTemp: Int, highTemp: Int, lowHum: Int, highHum: Int) {
+    fun updatePhaseSettings(phase: String, lowTemp: Float, highTemp: Float, lowHum: Float, highHum: Float) {
         // Update SharedPreferences with the selected phase and temperature/humidity ranges
         with(sharedPreferences.edit()) {
             putString("selected_phase", phase)
-            putInt("low_temp", lowTemp)
-            putInt("high_temp", highTemp)
-            putInt("low_hum", lowHum)
-            putInt("high_hum", highHum)
+            putFloat("low_temp", lowTemp)
+            putFloat("high_temp", highTemp)
+            putFloat("low_hum", lowHum)
+            putFloat("high_hum", highHum)
             apply()
         }
         // Update the values in the ViewModel
@@ -233,26 +233,19 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
             apply()
         }
     }
-    fun getTemperatureLow(): Int {
-        return sharedPreferences.getInt("low_temp", 0)
+    fun getTemperatureLow(): Float {
+        return sharedPreferences.getFloat("low_temp", 0.0f)
     }
 
-    fun getTemperatureHigh(): Int {
-        return sharedPreferences.getInt("high_temp", 0)
+    fun getTemperatureHigh(): Float {
+        return sharedPreferences.getFloat("high_temp", 0.0f)
     }
 
-    fun getHumidityLow(): Int {
-        return sharedPreferences.getInt("low_hum", 0)
+    fun getHumidityLow(): Float {
+        return sharedPreferences.getFloat("low_hum", 0.0f)
     }
 
-    fun getHumidityHigh(): Int {
-        return sharedPreferences.getInt("high_hum", 0)
-    }
-
-    fun getTemperatureInt(): Int {
-        return sharedPreferences.getInt("temperature_int",0)
-    }
-    fun getHumidityInt(): Int {
-        return sharedPreferences.getInt("humidity_int",0)
+    fun getHumidityHigh(): Float {
+        return sharedPreferences.getFloat("high_hum", 0.0f)
     }
 }

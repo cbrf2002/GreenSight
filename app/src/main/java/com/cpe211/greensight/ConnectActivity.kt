@@ -3,13 +3,16 @@ package com.cpe211.greensight
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowInsetsController
 import android.view.animation.AccelerateInterpolator
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
@@ -23,11 +26,14 @@ class ConnectActivity : AppCompatActivity() {
     private lateinit var ipAddress: String
     private lateinit var username: String
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_connect)
         window.statusBarColor = ContextCompat.getColor(this, R.color.bgWhite)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.bgWhite)
+        window.isStatusBarContrastEnforced = true
+        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 
         val nameEnterText = findViewById<EditText>(R.id.textfield_enter_name)
         val ipAddressEditText = findViewById<EditText>(R.id.textfield_enter_IP)

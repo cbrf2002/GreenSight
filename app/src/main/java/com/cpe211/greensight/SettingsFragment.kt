@@ -64,7 +64,7 @@ class SettingsFragment : Fragment() {
         buttonSeedling.setOnClickListener {
             toggleButton(buttonSeedling)
             animateButton(buttonSeedling)
-            handleButtonClick("Seedling Phase", 18, 24, 60, 70)
+            handleButtonClick("Seedling Phase", 18.0f, 24.0f, 60.0f, 70.0f)
             buttonSubmitManual.visibility = View.INVISIBLE
             deactivateOtherButtons(buttonSeedling)
             saveSelectedPhase("Seedling Phase")
@@ -73,7 +73,7 @@ class SettingsFragment : Fragment() {
         buttonFlowering.setOnClickListener {
             toggleButton(buttonFlowering)
             animateButton(buttonFlowering)
-            handleButtonClick("Flowering Phase", 18, 26, 40, 50)
+            handleButtonClick("Flowering Phase", 18.0f, 26.0f, 40.0f, 50.0f)
             buttonSubmitManual.visibility = View.INVISIBLE
             deactivateOtherButtons(buttonFlowering)
             saveSelectedPhase("Flowering Phase")
@@ -82,7 +82,7 @@ class SettingsFragment : Fragment() {
         buttonVegetative.setOnClickListener {
             toggleButton(buttonVegetative)
             animateButton(buttonVegetative)
-            handleButtonClick("Vegetative Phase", 20, 28, 40, 60)
+            handleButtonClick("Vegetative Phase", 20.0f, 28.0f, 40.0f, 60.0f)
             buttonSubmitManual.visibility = View.INVISIBLE
             deactivateOtherButtons(buttonVegetative)
             saveSelectedPhase("Vegetative Phase")
@@ -127,14 +127,14 @@ class SettingsFragment : Fragment() {
         lastSelectedPhase = phase
     }
 
-    private fun handleButtonClick(phase: String, lowTemp: Int, highTemp: Int, lowHum: Int, highHum: Int) {
+    private fun handleButtonClick(phase: String, lowTemp: Float, highTemp: Float, lowHum: Float, highHum: Float) {
         // Update SharedPreferences with the selected phase and temperature/humidity ranges
         with(sharedPreferences.edit()) {
             putString("selected_phase", phase)
-            putInt("low_temp", lowTemp)
-            putInt("high_temp", highTemp)
-            putInt("low_hum", lowHum)
-            putInt("high_hum", highHum)
+            putFloat("low_temp", lowTemp)
+            putFloat("high_temp", highTemp)
+            putFloat("low_hum", lowHum)
+            putFloat("high_hum", highHum)
             apply()
         }
 
@@ -164,12 +164,12 @@ class SettingsFragment : Fragment() {
     }
 
     private fun submitManualMode() {
-        val lowTemp = textEditLowTemp.text.toString().toIntOrNull() ?: return
-        val highTemp = textEditHighTemp.text.toString().toIntOrNull() ?: return
-        val lowHum = textEditLowHum.text.toString().toIntOrNull() ?: return
-        val highHum = textEditHighHum.text.toString().toIntOrNull() ?: return
+        val lowTemp = textEditLowTemp.text.toString().toFloatOrNull() ?: return
+        val highTemp = textEditHighTemp.text.toString().toFloatOrNull() ?: return
+        val lowHum = textEditLowHum.text.toString().toFloatOrNull() ?: return
+        val highHum = textEditHighHum.text.toString().toFloatOrNull() ?: return
 
-        if (lowTemp !in -40..100 || highTemp !in -40..100 || lowHum !in 0..100 || highHum !in 0..100) {
+        if (lowTemp !in -40.0f..100.0f || highTemp !in -40.0f..100.0f || lowHum !in 0.0f..100.0f || highHum !in 0.0f..100.0f) {
             showToast("Please enter values within the specified range (-40 to 100 for temperature, 0 to 100 for humidity")
             return
         }
@@ -181,10 +181,10 @@ class SettingsFragment : Fragment() {
 
         // Update SharedPreferences with the entered values
         sharedPreferences.edit().apply {
-            putInt("low_temp", lowTemp)
-            putInt("high_temp", highTemp)
-            putInt("low_hum", lowHum)
-            putInt("high_hum", highHum)
+            putFloat("low_temp", lowTemp)
+            putFloat("high_temp", highTemp)
+            putFloat("low_hum", lowHum)
+            putFloat("high_hum", highHum)
             apply()
         }
 
@@ -229,10 +229,10 @@ class SettingsFragment : Fragment() {
                 "Manual" -> {
                     buttonManual.performClick()
                     buttonSubmitManual.visibility = View.VISIBLE
-                    val lowTemp = sharedPreferences.getInt("low_temp", 0)
-                    val highTemp = sharedPreferences.getInt("high_temp", 0)
-                    val lowHum = sharedPreferences.getInt("low_hum", 0)
-                    val highHum = sharedPreferences.getInt("high_hum", 0)
+                    val lowTemp = sharedPreferences.getFloat("low_temp", 0.0f)
+                    val highTemp = sharedPreferences.getFloat("high_temp", 0.0f)
+                    val lowHum = sharedPreferences.getFloat("low_hum", 0.0f)
+                    val highHum = sharedPreferences.getFloat("high_hum", 0.0f)
                     // Set the values in the EditText fields
                     textEditLowTemp.setText(lowTemp.toString())
                     textEditHighTemp.setText(highTemp.toString())
